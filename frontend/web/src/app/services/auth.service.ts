@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Usuario {
     idUsuario: number;
@@ -14,9 +15,9 @@ export interface Usuario {
     estado: string;
 }
 
-    @Injectable({ providedIn: 'root' })
-    export class AuthService {
-    private apiUrl = 'https://chanieldeluxe-web.onrender.com/api';
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+    private apiUrl = environment.apiUrl;
     currentUser = signal<Usuario | null>(this.loadUser());
 
     constructor(private http: HttpClient) {}

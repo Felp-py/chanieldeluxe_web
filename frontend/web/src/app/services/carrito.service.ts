@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface CarritoItem {
   idCarrito: number;
@@ -13,7 +14,7 @@ export interface CarritoItem {
 
 @Injectable({ providedIn: 'root' })
 export class CarritoService {
-  private apiUrl = 'https://chanieldeluxe-web.onrender.com/api/carrito';
+  private apiUrl = `${environment.apiUrl}/carrito`;
   count = signal(0);
   constructor(private http: HttpClient) {}
   listar(idUsuario: number): Observable<CarritoItem[]> {

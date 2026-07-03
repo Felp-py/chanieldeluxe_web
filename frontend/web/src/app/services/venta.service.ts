@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Venta {
   idVenta: number;
@@ -17,7 +18,7 @@ export interface Venta {
 
 @Injectable({ providedIn: 'root' })
 export class VentaService {
-  private apiUrl = 'https://chanieldeluxe-web.onrender.com/api/ventas';
+  private apiUrl = `${environment.apiUrl}/ventas`;
   constructor(private http: HttpClient) {}
   crear(data: any): Observable<Venta> { return this.http.post<Venta>(this.apiUrl, data); }
   misPedidos(idUsuario: number): Observable<Venta[]> { return this.http.get<Venta[]>(`${this.apiUrl}/usuario/${idUsuario}`); }

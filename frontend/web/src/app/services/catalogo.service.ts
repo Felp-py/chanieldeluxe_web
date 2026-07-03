@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Producto {
   idProducto: number;
@@ -19,7 +20,7 @@ export interface Producto {
 
 @Injectable({ providedIn: 'root' })
 export class CatalogoService {
-  private apiUrl = 'https://chanieldeluxe-web.onrender.com/api/catalogo';
+  private apiUrl = `${environment.apiUrl}/catalogo`;
   constructor(private http: HttpClient) {}
   listar(): Observable<Producto[]> { return this.http.get<Producto[]>(this.apiUrl); }
   listarTodos(): Observable<Producto[]> { return this.http.get<Producto[]>(`${this.apiUrl}/todos`); }

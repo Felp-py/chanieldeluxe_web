@@ -5,10 +5,10 @@ import org.springframework.stereotype.Service;
 import webintegrado.dto.request.CarritoRequest;
 import webintegrado.dto.response.CarritoResponse;
 import webintegrado.model.Carrito;
-import webintegrado.model.Catalogo;
+import webintegrado.model.ProductoTalla;
 import webintegrado.model.Usuario;
 import webintegrado.repository.CarritoRepository;
-import webintegrado.repository.CatalogoRepository;
+import webintegrado.repository.ProductoTallaRepository;
 import webintegrado.repository.UsuarioRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,21 +19,21 @@ public class CarritoService {
 
     private final CarritoRepository carritoRepository;
     private final UsuarioRepository usuarioRepository;
-    private final CatalogoRepository catalogoRepository;
+    private final ProductoTallaRepository productoTallaRepository;
 
     public CarritoResponse agregar(CarritoRequest request) {
         Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        Catalogo producto = catalogoRepository.findById(request.getIdProducto())
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        ProductoTalla variante = productoTallaRepository.findById(request.getIdVariante())
+                .orElseThrow(() -> new RuntimeException("Talla no encontrada"));
 
         Carrito carrito = carritoRepository
-                .findByUsuarioIdUsuarioAndProductoIdProducto(
-                        request.getIdUsuario(), request.getIdProducto())
+                .findByUsuarioIdUsuarioAndVarianteIdVariante(
+                        request.getIdUsuario(), request.getIdVariante())
                 .map(c -> { c.setCantidad(c.getCantidad() + request.getCantidad()); return c; })
                 .orElse(Carrito.builder()
                         .usuario(usuario)
-                        .producto(producto)
+                        .variante(variante)
                         .cantidad(request.getCantidad())
                         .fechaAgregado(LocalDateTime.now())
                         .build());
@@ -57,11 +57,13 @@ public class CarritoService {
     private CarritoResponse toResponse(Carrito c) {
         CarritoResponse r = new CarritoResponse();
         r.setIdCarrito(c.getIdCarrito());
-        r.setIdProducto(c.getProducto().getIdProducto());
-        r.setNombreProducto(c.getProducto().getNombre());
+        r.setIdVariante(c.getVariante().getIdVariante());
+        r.setIdProducto(c.getVariante().getProducto().getIdProducto());
+        r.setNombreProducto(c.getVariante().getProducto().getNombre());
+        r.setTalla(c.getVariante().getTalla().name());
         r.setCantidad(c.getCantidad());
-        r.setPrecioUnitario(c.getProducto().getPrecioUnitario());
-        r.setSubtotal(c.getProducto().getPrecioUnitario()
+        r.setPrecioUnitario(c.getVariante().getProducto().getPrecioUnitario());
+        r.setSubtotal(c.getVariante().getProducto().getPrecioUnitario()
                 .multiply(java.math.BigDecimal.valueOf(c.getCantidad())));
         return r;
     }

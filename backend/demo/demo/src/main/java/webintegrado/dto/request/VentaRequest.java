@@ -21,7 +21,7 @@ public class VentaRequest {
     @Data
     public static class DetalleRequest {
         @NotNull
-        private Integer idProducto;
+        private Integer idVariante;
         @Min(1)
         private Integer cantidad;
     }

@@ -22,6 +22,7 @@ public class VentaResponse {
     public static class DetalleResponse {
         private Integer idProducto;
         private String nombreProducto;
+        private String talla;
         private Integer cantidad;
         private BigDecimal precioUnitario;
         private BigDecimal subtotal;

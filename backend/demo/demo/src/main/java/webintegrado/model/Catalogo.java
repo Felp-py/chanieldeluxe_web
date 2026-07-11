@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "catalogo")
@@ -28,9 +29,11 @@ public class Catalogo {
     @Column(nullable = false)
     private Categoria categoria;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Talla talla;
+    // Un producto ahora puede tener varias tallas, cada una con su propio stock.
+    // Ver la entidad ProductoTalla.
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ProductoTalla> variantes = new java.util.ArrayList<>();
 
     @Column(length = 50)
     private String color;

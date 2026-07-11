@@ -1,11 +1,15 @@
 <div class="pedidos-page container">
   <h1>Mis Pedidos</h1>
 
+  @if(toast()) {
+    <div class="toast" [class.toast-error]="toastType()==='error'">{{toast()}}</div>
+  }
+
   @if(loading()) {
     <div class="spinner"></div>
   } @else if(pedidos().length === 0) {
     <div class="empty-state">
-      <div class="icon">📦</div>
+      <div class="icon"></div>
       <p>Aún no tienes pedidos realizados.</p>
     </div>
   } @else {
@@ -21,13 +25,18 @@
           </div>
           <div class="pedido-body">
             <p>{{p.detalles?.length || 0}} artículo(s) · Pago: {{p.metodoPago | titlecase}}</p>
-            <p class="pedido-dir">📍 {{p.direccionEnvio}}, {{p.ciudadEnvio}}</p>
+            <p class="pedido-dir"> {{p.direccionEnvio}}, {{p.ciudadEnvio}}</p>
           </div>
           <div class="pedido-total">
             <span>Total</span>
             <strong>S/ {{p.total | number:'1.2-2'}}</strong>
           </div>
-          <span class="ver-detalle">Ver detalles →</span>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="ver-detalle">Ver detalles →</span>
+            @if(puedeCancelar(p)) {
+              <button class="btn-del" [disabled]="cancelando()" (click)="cancelarPedido(p, $event)">Cancelar pedido</button>
+            }
+          </div>
         </div>
       }
     </div>
@@ -50,7 +59,7 @@
           <h4 style="margin: 16px 0 10px;">Artículos</h4>
           @for(d of pedidoDetalle()!.detalles; track d.idProducto) {
             <div class="detail-row">
-              <span>{{d.nombreProducto}} x{{d.cantidad}}</span>
+              <span>{{d.nombreProducto}} @if(d.talla) { (Talla {{d.talla}}) } x{{d.cantidad}}</span>
               <span>S/ {{d.subtotal | number:'1.2-2'}}</span>
             </div>
           }

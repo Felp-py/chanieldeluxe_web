@@ -37,4 +37,12 @@ public class VentaController {
             @RequestParam String estado) {
         return ResponseEntity.ok(ventaService.actualizarEstado(idVenta, estado));
     }
+
+    /** El cliente cancela su propio pedido (solo si aún no fue enviado). */
+    @PutMapping("/{idVenta}/cancelar")
+    public ResponseEntity<VentaResponse> cancelar(
+            @PathVariable Integer idVenta,
+            @RequestParam Integer idUsuario) {
+        return ResponseEntity.ok(ventaService.cancelarPorCliente(idVenta, idUsuario));
+    }
 }

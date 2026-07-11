@@ -3,19 +3,25 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+export interface Variante {
+  idVariante: number;
+  talla: string;
+  cantidadDisponible: number;
+}
+
 export interface Producto {
   idProducto: number;
   nombre: string;
   descripcion: string;
   categoria: string;
-  talla: string;
   color: string;
   material: string;
   precioUnitario: number;
   precioOferta?: number;
   imagenUrl?: string;
   estado: string;
-  stockDisponible: number;
+  variantes: Variante[];
+  stockTotal: number;
 }
 
 @Injectable({ providedIn: 'root' })

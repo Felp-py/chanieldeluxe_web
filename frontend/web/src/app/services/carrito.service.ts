@@ -5,8 +5,10 @@ import { environment } from '../../environments/environment';
 
 export interface CarritoItem {
   idCarrito: number;
+  idVariante: number;
   idProducto: number;
   nombreProducto: string;
+  talla: string;
   cantidad: number;
   precioUnitario: number;
   subtotal: number;
@@ -22,8 +24,8 @@ export class CarritoService {
       tap(items => this.count.set(items.length))
     );
   }
-  agregar(idUsuario: number, idProducto: number, cantidad: number = 1): Observable<CarritoItem> {
-    return this.http.post<CarritoItem>(this.apiUrl, { idUsuario, idProducto, cantidad }).pipe(
+  agregar(idUsuario: number, idVariante: number, cantidad: number = 1): Observable<CarritoItem> {
+    return this.http.post<CarritoItem>(this.apiUrl, { idUsuario, idVariante, cantidad }).pipe(
       tap(() => this.count.update(c => c + 1))
     );
   }

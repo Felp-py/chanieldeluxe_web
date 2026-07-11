@@ -22,8 +22,8 @@ public class Carrito {
     private Usuario usuario;
 
     @ManyToOne
-    @JoinColumn(name = "id_producto", nullable = false)
-    private Catalogo producto;
+    @JoinColumn(name = "id_variante", nullable = false)
+    private ProductoTalla variante;
 
     @Builder.Default
     @Column(nullable = false)

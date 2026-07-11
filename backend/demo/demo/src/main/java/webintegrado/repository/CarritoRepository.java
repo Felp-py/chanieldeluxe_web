@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface CarritoRepository extends JpaRepository<Carrito, Integer> {
     List<Carrito> findByUsuarioIdUsuario(Integer idUsuario);
-    Optional<Carrito> findByUsuarioIdUsuarioAndProductoIdProducto(Integer idUsuario, Integer idProducto);
+    Optional<Carrito> findByUsuarioIdUsuarioAndVarianteIdVariante(Integer idUsuario, Integer idVariante);
     void deleteByUsuarioIdUsuario(Integer idUsuario);
 }

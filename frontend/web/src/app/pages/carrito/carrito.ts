@@ -63,7 +63,7 @@ export class Carrito implements OnInit {
       metodoPago: this.form.metodoPago,
       direccionEnvio: this.form.direccionEnvio,
       ciudadEnvio: this.form.ciudadEnvio,
-      detalles: this.items().map(i => ({ idProducto: i.idProducto, cantidad: i.cantidad }))
+      detalles: this.items().map(i => ({ idVariante: i.idVariante, cantidad: i.cantidad }))
     };
     this.ventaSvc.crear(payload).subscribe({
       next: () => {

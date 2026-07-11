@@ -8,7 +8,7 @@ public class CarritoRequest {
     @NotNull
     private Integer idUsuario;
     @NotNull
-    private Integer idProducto;
+    private Integer idVariante;
     @Min(1)
     private Integer cantidad = 1;
 }

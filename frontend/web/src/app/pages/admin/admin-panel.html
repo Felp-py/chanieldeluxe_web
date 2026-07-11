@@ -28,11 +28,10 @@
               <tr>
                 <th>Producto</th>
                 <th>Categoría</th>
-                <th>Talla</th>
+                <th>Tallas / Stock</th>
                 <th>Color</th>
                 <th>Precio</th>
                 <th>Oferta</th>
-                <th>Stock</th>
                 <th>Estado</th>
                 <th>Acciones</th>
               </tr>
@@ -49,11 +48,14 @@
                     </div>
                   </td>
                   <td>{{p.categoria | titlecase}}</td>
-                  <td><span class="talla-pill">{{p.talla}}</span></td>
+                  <td>
+                    @for(v of p.variantes; track v.idVariante) {
+                      <span class="talla-pill" style="margin-right:4px;" [title]="v.cantidadDisponible + ' disponibles'">{{v.talla}}: {{v.cantidadDisponible}}</span>
+                    }
+                  </td>
                   <td>{{p.color || '—'}}</td>
                   <td>S/ {{p.precioUnitario | number:'1.2-2'}}</td>
                   <td>@if(p.precioOferta){ S/ {{p.precioOferta | number:'1.2-2'}} }@else{ — }</td>
-                  <td>{{p.stockDisponible ?? 0}}</td>
                   <td><span class="badge" [class]="p.estado==='activo' ? 'badge-success' : 'badge-danger'">{{p.estado}}</span></td>
                   <td>
                     <div class="action-btns">
@@ -75,6 +77,10 @@
       <div class="content-header">
         <h2>Todas las ventas ({{ventas().length}})</h2>
       </div>
+      <p style="color:#777; font-size:13px; margin:-8px 0 12px;">
+        El estado avanza automáticamente (pendiente → procesado → enviado → entregado) a lo largo del día.
+        Aquí puedes forzar un estado o cancelar un pedido manualmente.
+      </p>
       <div class="table-wrap card">
         <table class="data-table">
           <thead>
@@ -143,10 +149,8 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Talla *</label>
-            <select [(ngModel)]="form.talla">
-              @for(t of tallas; track t) { <option [value]="t">{{t}}</option> }
-            </select>
+            <label>Material</label>
+            <input [(ngModel)]="form.material" placeholder="Algodón, polyester..." />
           </div>
         </div>
         <div class="form-row">
@@ -159,15 +163,20 @@
             <input type="number" [(ngModel)]="form.precioOferta" min="0" step="0.01" />
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Stock disponible</label>
-            <input type="number" [(ngModel)]="form.stockDisponible" min="0" />
-          </div>
-          <div class="form-group">
-            <label>Material</label>
-            <input [(ngModel)]="form.material" placeholder="Algodón, polyester..." />
-          </div>
+
+        <!-- Tallas y stock por talla -->
+        <div class="form-group">
+          <label>Tallas y stock disponible *</label>
+          @for(v of variantesForm; track $index) {
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+              <select [(ngModel)]="v.talla" style="flex:1;">
+                @for(t of tallas; track t) { <option [value]="t">{{t}}</option> }
+              </select>
+              <input type="number" [(ngModel)]="v.cantidadDisponible" min="0" placeholder="Stock" style="flex:1;" />
+              <button class="btn-del" type="button" (click)="quitarFilaTalla($index)">Quitar</button>
+            </div>
+          }
+          <button class="btn-secondary" type="button" (click)="agregarFilaTalla()">+ Agregar talla</button>
         </div>
         <div class="form-group">
           <label>URL de imagen</label>

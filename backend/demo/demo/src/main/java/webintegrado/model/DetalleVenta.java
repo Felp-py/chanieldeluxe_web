@@ -25,6 +25,10 @@ public class DetalleVenta {
     @JoinColumn(name = "id_producto", nullable = false)
     private Catalogo producto;
 
+    @ManyToOne
+    @JoinColumn(name = "id_variante")
+    private ProductoTalla variante;
+
     @Column(nullable = false)
     private Integer cantidad;
 

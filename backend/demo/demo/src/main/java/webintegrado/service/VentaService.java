@@ -10,6 +10,7 @@ import webintegrado.repository.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -17,10 +18,13 @@ public class VentaService {
 
     private final VentaRepository ventaRepository;
     private final UsuarioRepository usuarioRepository;
-    private final CatalogoRepository catalogoRepository;
-    private final StockRepository stockRepository;
+    private final ProductoTallaRepository productoTallaRepository;
     private final DetalleVentaRepository detalleVentaRepository;
     private final CarritoRepository carritoRepository;
+
+    // Estados en los que el cliente todavía puede arrepentirse y cancelar su pedido.
+    private static final Set<Venta.EstadoVenta> CANCELABLE_POR_CLIENTE =
+            Set.of(Venta.EstadoVenta.pendiente, Venta.EstadoVenta.procesado);
 
     @Transactional
     public VentaResponse crear(VentaRequest request) {
@@ -41,21 +45,20 @@ public class VentaService {
         List<DetalleVenta> detalles = new ArrayList<>();
 
         for (VentaRequest.DetalleRequest d : request.getDetalles()) {
-            Catalogo producto = catalogoRepository.findById(d.getIdProducto())
-                    .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + d.getIdProducto()));
+            ProductoTalla variante = productoTallaRepository.findById(d.getIdVariante())
+                    .orElseThrow(() -> new RuntimeException("Talla no encontrada: " + d.getIdVariante()));
+            Catalogo producto = variante.getProducto();
 
-            Stock stock = stockRepository.findByProductoIdProducto(d.getIdProducto())
-                    .orElseThrow(() -> new RuntimeException("Stock no encontrado"));
+            if (variante.getCantidadDisponible() < d.getCantidad())
+                throw new RuntimeException("Stock insuficiente para: " + producto.getNombre() + " (talla " + variante.getTalla() + ")");
 
-            if (stock.getCantidadDisponible() < d.getCantidad())
-                throw new RuntimeException("Stock insuficiente para: " + producto.getNombre());
-
-            stock.setCantidadDisponible(stock.getCantidadDisponible() - d.getCantidad());
-            stockRepository.save(stock);
+            variante.setCantidadDisponible(variante.getCantidadDisponible() - d.getCantidad());
+            productoTallaRepository.save(variante);
 
             DetalleVenta detalle = DetalleVenta.builder()
                     .venta(venta)
                     .producto(producto)
+                    .variante(variante)
                     .cantidad(d.getCantidad())
                     .precioUnitario(producto.getPrecioUnitario())
                     .build();
@@ -76,12 +79,46 @@ public class VentaService {
                 .stream().map(v -> toResponse(v, v.getDetalles())).toList();
     }
 
+    @Transactional
     public VentaResponse actualizarEstado(Integer idVenta, String nuevoEstado) {
         Venta venta = ventaRepository.findById(idVenta)
                 .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
-        venta.setEstado(Venta.EstadoVenta.valueOf(nuevoEstado));
+        Venta.EstadoVenta estado = Venta.EstadoVenta.valueOf(nuevoEstado);
+
+        if (estado == Venta.EstadoVenta.cancelado && venta.getEstado() != Venta.EstadoVenta.cancelado) {
+            reponerStock(venta);
+        }
+
+        venta.setEstado(estado);
         ventaRepository.save(venta);
         return toResponse(venta, venta.getDetalles());
+    }
+
+    @Transactional
+    public VentaResponse cancelarPorCliente(Integer idVenta, Integer idUsuario) {
+        Venta venta = ventaRepository.findById(idVenta)
+                .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+
+        if (!venta.getUsuario().getIdUsuario().equals(idUsuario))
+            throw new RuntimeException("No puedes cancelar un pedido que no es tuyo");
+
+        if (!CANCELABLE_POR_CLIENTE.contains(venta.getEstado()))
+            throw new RuntimeException("El pedido ya está en camino y no se puede cancelar");
+
+        reponerStock(venta);
+        venta.setEstado(Venta.EstadoVenta.cancelado);
+        ventaRepository.save(venta);
+        return toResponse(venta, venta.getDetalles());
+    }
+
+    private void reponerStock(Venta venta) {
+        if (venta.getDetalles() == null) return;
+        for (DetalleVenta d : venta.getDetalles()) {
+            if (d.getVariante() == null) continue;
+            ProductoTalla variante = d.getVariante();
+            variante.setCantidadDisponible(variante.getCantidadDisponible() + d.getCantidad());
+            productoTallaRepository.save(variante);
+        }
     }
 
     private VentaResponse toResponse(Venta v, List<DetalleVenta> detalles) {
@@ -101,6 +138,7 @@ public class VentaService {
                 VentaResponse.DetalleResponse dr = new VentaResponse.DetalleResponse();
                 dr.setIdProducto(d.getProducto().getIdProducto());
                 dr.setNombreProducto(d.getProducto().getNombre());
+                dr.setTalla(d.getVariante() != null ? d.getVariante().getTalla().name() : null);
                 dr.setCantidad(d.getCantidad());
                 dr.setPrecioUnitario(d.getPrecioUnitario());
                 dr.setSubtotal(d.getPrecioUnitario()

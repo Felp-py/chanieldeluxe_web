@@ -26,4 +26,7 @@ export class VentaService {
   actualizarEstado(idVenta: number, estado: string): Observable<Venta> {
     return this.http.put<Venta>(`${this.apiUrl}/${idVenta}/estado`, null, { params: { estado } });
   }
+  cancelar(idVenta: number, idUsuario: number): Observable<Venta> {
+    return this.http.put<Venta>(`${this.apiUrl}/${idVenta}/cancelar`, null, { params: { idUsuario } });
+  }
 }

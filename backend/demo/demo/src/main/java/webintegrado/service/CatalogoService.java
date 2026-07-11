@@ -5,12 +5,13 @@ import org.springframework.stereotype.Service;
 import webintegrado.dto.request.CatalogoRequest;
 import webintegrado.dto.response.CatalogoResponse;
 import webintegrado.model.Catalogo;
-import webintegrado.model.Stock;
+import webintegrado.model.ProductoTalla;
 import webintegrado.model.Usuario;
 import webintegrado.repository.CatalogoRepository;
-import webintegrado.repository.StockRepository;
+import webintegrado.repository.ProductoTallaRepository;
 import webintegrado.repository.UsuarioRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -18,7 +19,7 @@ import java.util.List;
 public class CatalogoService {
 
         private final CatalogoRepository catalogoRepository;
-        private final StockRepository stockRepository;
+        private final ProductoTallaRepository productoTallaRepository;
         private final UsuarioRepository usuarioRepository;
 
         public CatalogoResponse crear(CatalogoRequest request, Integer idAdmin) {
@@ -29,7 +30,6 @@ public class CatalogoService {
                         .nombre(request.getNombre())
                         .descripcion(request.getDescripcion())
                         .categoria(Catalogo.Categoria.valueOf(request.getCategoria()))
-                        .talla(Catalogo.Talla.valueOf(request.getTalla()))
                         .color(request.getColor())
                         .material(request.getMaterial())
                         .precioUnitario(request.getPrecioUnitario())
@@ -42,12 +42,7 @@ public class CatalogoService {
 
                 Catalogo saved = catalogoRepository.save(producto);
 
-                Stock stock = Stock.builder()
-                        .producto(saved)
-                        .cantidadDisponible(request.getStockDisponible() != null ? request.getStockDisponible() : 0)
-                        .cantidadMinima(3)
-                        .build();
-                stockRepository.save(stock);
+                guardarVariantes(saved, request.getVariantes());
 
                 return toResponse(saved);
         }
@@ -74,22 +69,19 @@ public class CatalogoService {
                 producto.setNombre(request.getNombre());
                 producto.setDescripcion(request.getDescripcion());
                 producto.setCategoria(Catalogo.Categoria.valueOf(request.getCategoria()));
-                producto.setTalla(Catalogo.Talla.valueOf(request.getTalla()));
                 producto.setColor(request.getColor());
                 producto.setMaterial(request.getMaterial());
                 producto.setPrecioUnitario(request.getPrecioUnitario());
                 producto.setPrecioOferta(request.getPrecioOferta());
                 producto.setImagenUrl(request.getImagenUrl());
                 producto.setFechaActualizacion(LocalDateTime.now());
+                catalogoRepository.save(producto);
 
-                if (request.getStockDisponible() != null) {
-                stockRepository.findByProductoIdProducto(id).ifPresent(stock -> {
-                        stock.setCantidadDisponible(request.getStockDisponible());
-                        stockRepository.save(stock);
-                });
+                if (request.getVariantes() != null && !request.getVariantes().isEmpty()) {
+                        actualizarVariantes(producto, request.getVariantes());
                 }
 
-                return toResponse(catalogoRepository.save(producto));
+                return toResponse(producto);
         }
 
         public void eliminar(Integer id) {
@@ -99,21 +91,81 @@ public class CatalogoService {
                 catalogoRepository.save(producto);
         }
 
+        /** Crea las variantes de talla (una fila por talla) para un producto nuevo. */
+        private void guardarVariantes(Catalogo producto, List<CatalogoRequest.VarianteRequest> variantesReq) {
+                for (CatalogoRequest.VarianteRequest v : variantesReq) {
+                        ProductoTalla variante = ProductoTalla.builder()
+                                .producto(producto)
+                                .talla(Catalogo.Talla.valueOf(v.getTalla()))
+                                .cantidadDisponible(v.getCantidadDisponible() != null ? v.getCantidadDisponible() : 0)
+                                .cantidadMinima(3)
+                                .build();
+                        productoTallaRepository.save(variante);
+                }
+        }
+
+        /**
+         * Sincroniza las variantes existentes de un producto con las enviadas desde el formulario:
+         * actualiza el stock de las tallas que ya existen, crea las nuevas y elimina las que ya no están.
+         */
+        private void actualizarVariantes(Catalogo producto, List<CatalogoRequest.VarianteRequest> variantesReq) {
+                List<ProductoTalla> existentes = productoTallaRepository.findByProductoIdProducto(producto.getIdProducto());
+
+                List<String> tallasEnviadas = variantesReq.stream().map(CatalogoRequest.VarianteRequest::getTalla).toList();
+
+                // eliminar variantes que ya no vienen en el request
+                for (ProductoTalla ex : existentes) {
+                        if (!tallasEnviadas.contains(ex.getTalla().name())) {
+                                productoTallaRepository.delete(ex);
+                        }
+                }
+
+                for (CatalogoRequest.VarianteRequest v : variantesReq) {
+                        ProductoTalla existente = existentes.stream()
+                                .filter(ex -> ex.getTalla().name().equals(v.getTalla()))
+                                .findFirst().orElse(null);
+                        if (existente != null) {
+                                existente.setCantidadDisponible(v.getCantidadDisponible() != null ? v.getCantidadDisponible() : 0);
+                                existente.setUltimaActualizacion(LocalDateTime.now());
+                                productoTallaRepository.save(existente);
+                        } else {
+                                ProductoTalla nueva = ProductoTalla.builder()
+                                        .producto(producto)
+                                        .talla(Catalogo.Talla.valueOf(v.getTalla()))
+                                        .cantidadDisponible(v.getCantidadDisponible() != null ? v.getCantidadDisponible() : 0)
+                                        .cantidadMinima(3)
+                                        .build();
+                                productoTallaRepository.save(nueva);
+                        }
+                }
+        }
+
         private CatalogoResponse toResponse(Catalogo c) {
                 CatalogoResponse r = new CatalogoResponse();
                 r.setIdProducto(c.getIdProducto());
                 r.setNombre(c.getNombre());
                 r.setDescripcion(c.getDescripcion());
                 r.setCategoria(c.getCategoria().name());
-                r.setTalla(c.getTalla().name());
                 r.setColor(c.getColor());
                 r.setMaterial(c.getMaterial());
                 r.setPrecioUnitario(c.getPrecioUnitario());
                 r.setPrecioOferta(c.getPrecioOferta());
                 r.setImagenUrl(c.getImagenUrl());
                 r.setEstado(c.getEstado().name());
-                stockRepository.findByProductoIdProducto(c.getIdProducto())
-                        .ifPresent(s -> r.setStockDisponible(s.getCantidadDisponible()));
+
+                List<ProductoTalla> variantes = productoTallaRepository.findByProductoIdProducto(c.getIdProducto());
+                List<CatalogoResponse.VarianteResponse> variantesResp = new ArrayList<>();
+                int total = 0;
+                for (ProductoTalla v : variantes) {
+                        CatalogoResponse.VarianteResponse vr = new CatalogoResponse.VarianteResponse();
+                        vr.setIdVariante(v.getIdVariante());
+                        vr.setTalla(v.getTalla().name());
+                        vr.setCantidadDisponible(v.getCantidadDisponible());
+                        variantesResp.add(vr);
+                        total += v.getCantidadDisponible();
+                }
+                r.setVariantes(variantesResp);
+                r.setStockTotal(total);
                 return r;
         }
 }

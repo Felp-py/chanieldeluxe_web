@@ -58,7 +58,7 @@
         <div class="spinner"></div>
       } @else if(productosFiltrados.length === 0) {
         <div class="empty-state">
-          <div class="icon">🔍</div>
+          <div class="icon"></div>
           <p>No se encontraron productos con esos filtros.</p>
           <button class="btn-secondary" style="margin-top:16px" (click)="limpiarFiltros()">Limpiar filtros</button>
         </div>
@@ -67,7 +67,9 @@
           @for(p of productosFiltrados; track p.idProducto) {
             <div class="product-card card">
               <div class="product-img">
-                <img [src]="imagenUrl(p)" [alt]="p.nombre" />
+                <a [routerLink]="['/producto', p.idProducto]">
+                  <img [src]="imagenUrl(p)" [alt]="p.nombre" />
+                </a>
                 @if(p.precioOferta) { <span class="oferta-badge">Oferta</span> }
                 @if(p.stockTotal < 1) { <span class="agotado-badge">Agotado</span> }
               </div>
@@ -75,7 +77,7 @@
                 <div class="product-meta">
                   <span class="cat-label">{{p.categoria | titlecase}}</span>
                 </div>
-                <h3>{{p.nombre}}</h3>
+                <h3><a [routerLink]="['/producto', p.idProducto]" class="product-link">{{p.nombre}}</a></h3>
                 @if(p.color) { <p class="product-detail">Color: {{p.color}}</p> }
                 <div class="product-price">
                   @if(p.precioOferta) {

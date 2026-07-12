@@ -1,0 +1,96 @@
+@if(toast()) {
+    <div class="toast" [class.toast-error]="toastType()==='error'">{{toast()}}</div>
+}
+
+    <div class="detalle-page container">
+    @if(loading()) {
+        <div class="spinner"></div>
+    } @else if(notFound() || !producto()) {
+        <div class="empty-state">
+        <div class="icon"></div>
+        <p>No encontramos este producto.</p>
+        <a routerLink="/catalogo" class="btn-secondary" style="margin-top:16px; display:inline-block;">Volver al catálogo</a>
+        </div>
+    } @else {
+        <div class="breadcrumbs">
+        <a routerLink="/catalogo">Catálogo</a>
+        <span>/</span>
+        <span>{{producto()!.nombre}}</span>
+        </div>
+
+        <div class="detalle-layout">
+        <!-- Imagen -->
+        <div class="detalle-img">
+            <img [src]="imagenUrl(producto()!)" [alt]="producto()!.nombre" />
+            @if(producto()!.precioOferta) { <span class="oferta-badge">Oferta</span> }
+            @if(producto()!.stockTotal < 1) { <span class="agotado-badge">Agotado</span> }
+        </div>
+
+        <!-- Info -->
+        <div class="detalle-info">
+            <span class="cat-label">{{producto()!.categoria | titlecase}}</span>
+            <h1>{{producto()!.nombre}}</h1>
+
+            <div class="product-price detalle-price">
+            @if(producto()!.precioOferta) {
+                <span class="price-old">S/ {{producto()!.precioUnitario | number:'1.2-2'}}</span>
+                <span class="price-new">S/ {{producto()!.precioOferta | number:'1.2-2'}}</span>
+            } @else {
+                <span class="price-new">S/ {{producto()!.precioUnitario | number:'1.2-2'}}</span>
+            }
+            </div>
+
+            @if(producto()!.color || producto()!.material) {
+            <div class="detalle-attrs">
+                @if(producto()!.color) { <span><strong>Color:</strong> {{producto()!.color}}</span> }
+                @if(producto()!.material) { <span><strong>Material:</strong> {{producto()!.material}}</span> }
+            </div>
+            }
+
+            @if(producto()!.descripcion) {
+            <div class="detalle-descripcion">
+                <h3>Descripción</h3>
+                <p>{{producto()!.descripcion}}</p>
+            </div>
+            }
+
+            <!-- Selector de talla -->
+            <div class="detalle-tallas">
+            <span class="filter-label">Talla</span>
+            <div class="talla-grid">
+                @for(v of producto()!.variantes; track v.idVariante) {
+                <button
+                    class="talla-btn"
+                    [class.active]="tallaSeleccionada()===v.talla"
+                    [disabled]="v.cantidadDisponible < 1"
+                    [title]="v.cantidadDisponible < 1 ? 'Sin stock en esta talla' : (v.cantidadDisponible + ' disponibles')"
+                    (click)="seleccionarTalla(v.talla)">
+                    {{v.talla}}
+                </button>
+                }
+            </div>
+            </div>
+
+            <div class="product-stock">
+            @if(varianteElegida) {
+                @if(varianteElegida!.cantidadDisponible > 5) {
+                <span class="badge badge-success">Stock: {{varianteElegida!.cantidadDisponible}}</span>
+                } @else if(varianteElegida!.cantidadDisponible > 0) {
+                <span class="badge badge-warn">Últimas {{varianteElegida!.cantidadDisponible}} unidades</span>
+                } @else {
+                <span class="badge badge-danger">Sin stock</span>
+                }
+            } @else if(producto()!.stockTotal < 1) {
+                <span class="badge badge-danger">Sin stock</span>
+            } @else {
+                <span class="badge badge-warn">Elige una talla</span>
+            }
+            </div>
+
+            <button class="btn-add detalle-btn-add" [disabled]="!varianteElegida || varianteElegida!.cantidadDisponible < 1" (click)="agregarAlCarrito()">
+            @if(producto()!.stockTotal < 1) { Sin stock } @else if(!varianteElegida) { Elige una talla } @else { + Agregar al carrito }
+            </button>
+        </div>
+        </div>
+    }
+</div>

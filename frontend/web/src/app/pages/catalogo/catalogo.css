@@ -165,6 +165,8 @@
   margin: 4px 0 4px; 
   color: var(--charcoal); 
 }
+.product-link { color: inherit; }
+.product-link:hover { color: var(--blush); }
 .product-detail { 
   font-size: 0.8rem; 
   color: var(--warm-gray); 

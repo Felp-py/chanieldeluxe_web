@@ -16,15 +16,20 @@ export class Catalogo implements OnInit {
   private catalogoSvc = inject(CatalogoService);
   private carritoSvc = inject(CarritoService);
   auth = inject(AuthService);
+
   productos = signal<Producto[]>([]);
   loading = signal(true);
   toast = signal('');
   toastType = signal('success');
+
+  // talla seleccionada por el usuario para cada producto (antes de agregar al carrito)
   tallaSeleccionada: Record<number, string> = {};
+
   filtroCategoria = '';
   filtroTalla = '';
   busqueda = '';
   ordenarPor = 'nombre';
+
   categorias = ['vestidos','blusas','pantalones','faldas','chaquetas','abrigos','ropa_interior','pijamas','ropa_deportiva','accesorios','calzado','otros'];
   tallas = ['XS','S','M','L','XL','XXL','UNICO'];
 

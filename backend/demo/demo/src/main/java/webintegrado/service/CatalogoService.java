@@ -152,6 +152,7 @@ public class CatalogoService {
                 r.setPrecioOferta(c.getPrecioOferta());
                 r.setImagenUrl(c.getImagenUrl());
                 r.setEstado(c.getEstado().name());
+                r.setFechaCreacion(c.getFechaCreacion());
 
                 List<ProductoTalla> variantes = productoTallaRepository.findByProductoIdProducto(c.getIdProducto());
                 List<CatalogoResponse.VarianteResponse> variantesResp = new ArrayList<>();
@@ -161,6 +162,7 @@ public class CatalogoService {
                         vr.setIdVariante(v.getIdVariante());
                         vr.setTalla(v.getTalla().name());
                         vr.setCantidadDisponible(v.getCantidadDisponible());
+                        vr.setCantidadMinima(v.getCantidadMinima());
                         variantesResp.add(vr);
                         total += v.getCantidadDisponible();
                 }

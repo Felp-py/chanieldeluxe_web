@@ -1,14 +1,45 @@
 <div class="carrito-page container">
   <h1>Mi Carrito</h1>
 
-  @if(exito()) {
-    <div class="exito-card card">
-      <div class="exito-icon">Éxito</div>
-      <h2>¡Pedido confirmado!</h2>
-      <p>Tu pedido fue procesado con éxito. Te contactaremos pronto.</p>
-      <div style="display:flex; gap:12px; justify-content:center; margin-top:20px;">
-        <a routerLink="/mis-pedidos" class="btn-primary">Ver mis pedidos</a>
-        <a routerLink="/catalogo" class="btn-secondary">Seguir comprando</a>
+  @if(pedidoConfirmado(); as pedido) {
+    <div class="confirmacion-wrap">
+      <div class="exito-card card">
+        <div class="exito-check">✓</div>
+        <h2>¡Pedido confirmado!</h2>
+        <p>Tu pedido <strong>#{{pedido.idVenta}}</strong> fue registrado con éxito. Te contactaremos pronto.</p>
+      </div>
+
+      <div class="confirmacion-card card">
+        <div class="confirmacion-head">
+          <div>
+            <span class="confirmacion-label">Número de pedido</span>
+            <span class="confirmacion-num">#{{pedido.idVenta}}</span>
+          </div>
+          <span class="badge badge-warn">{{pedido.estado | titlecase}}</span>
+        </div>
+
+        <div class="detail-row"><span>Fecha</span><span>{{pedido.fechaVenta | date:'dd/MM/yyyy HH:mm'}}</span></div>
+        <div class="detail-row"><span>Método de pago</span><span>{{pedido.metodoPago | titlecase}}</span></div>
+        <div class="detail-row"><span>Dirección de envío</span><span>{{pedido.direccionEnvio}}</span></div>
+        <div class="detail-row"><span>Ciudad</span><span>{{pedido.ciudadEnvio}}</span></div>
+
+        <h4 class="confirmacion-subtitle">Resumen de productos</h4>
+        @for(d of pedido.detalles; track d.idProducto + '-' + d.talla) {
+          <div class="confirmacion-item">
+            <span>{{d.nombreProducto}} @if(d.talla) { <span class="talla-pill">Talla {{d.talla}}</span> } × {{d.cantidad}}</span>
+            <span>S/ {{d.subtotal | number:'1.2-2'}}</span>
+          </div>
+        }
+
+        <div class="detail-total">
+          <span>Total pagado</span>
+          <strong>S/ {{pedido.total | number:'1.2-2'}}</strong>
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:center; margin-top:24px;">
+          <a routerLink="/mis-pedidos" class="btn-primary">Ver mis pedidos</a>
+          <a routerLink="/catalogo" class="btn-secondary">Seguir comprando</a>
+        </div>
       </div>
     </div>
   } @else if(loading()) {

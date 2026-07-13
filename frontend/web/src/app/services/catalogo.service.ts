@@ -7,6 +7,7 @@ export interface Variante {
   idVariante: number;
   talla: string;
   cantidadDisponible: number;
+  cantidadMinima?: number;
 }
 
 export interface Producto {
@@ -20,6 +21,7 @@ export interface Producto {
   precioOferta?: number;
   imagenUrl?: string;
   estado: string;
+  fechaCreacion?: string;
   variantes: Variante[];
   stockTotal: number;
 }

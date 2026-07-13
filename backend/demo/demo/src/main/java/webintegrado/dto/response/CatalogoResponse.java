@@ -2,6 +2,7 @@ package webintegrado.dto.response;
 
 import lombok.Data;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -16,6 +17,7 @@ public class CatalogoResponse {
     private BigDecimal precioOferta;
     private String imagenUrl;
     private String estado;
+    private LocalDateTime fechaCreacion;
 
     private List<VarianteResponse> variantes;
     private Integer stockTotal;
@@ -25,5 +27,6 @@ public class CatalogoResponse {
         private Integer idVariante;
         private String talla;
         private Integer cantidadDisponible;
+        private Integer cantidadMinima;
     }
 }

@@ -22,6 +22,14 @@ export class MisPedidos implements OnInit {
   // El cliente solo puede cancelar mientras el pedido no ha salido a reparto.
   private cancelablesPorCliente = ['pendiente', 'procesado'];
 
+  // Pasos del timeline visual del pedido (el estado avanza automático en el backend).
+  pasos = [
+    { key: 'pendiente', label: 'Pendiente' },
+    { key: 'procesado', label: 'Procesado' },
+    { key: 'enviado', label: 'Enviado' },
+    { key: 'entregado', label: 'Entregado' },
+  ];
+
   ngOnInit() {
     this.cargar();
   }
@@ -43,6 +51,20 @@ export class MisPedidos implements OnInit {
 
   puedeCancelar(p: Venta): boolean {
     return this.cancelablesPorCliente.includes(p.estado);
+  }
+
+  estaCancelado(p: Venta): boolean {
+    return p.estado === 'cancelado';
+  }
+
+  // Índice del paso actual dentro de `pasos` (-1 si el pedido está cancelado).
+  pasoActual(p: Venta): number {
+    return this.pasos.findIndex(pa => pa.key === p.estado);
+  }
+
+  // Un paso está "completado" (línea/círculo llenos) si ya fue alcanzado o superado.
+  pasoCompletado(p: Venta, index: number): boolean {
+    return !this.estaCancelado(p) && index <= this.pasoActual(p);
   }
 
   cancelarPedido(p: Venta, event: Event) {

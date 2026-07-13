@@ -47,13 +47,49 @@ export class AdminPanel implements OnInit {
 
   cargarProductos() {
     this.catalogoSvc.listarTodos().subscribe({
-      next: p => { this.productos.set(p); this.loading.set(false); },
+      // Los productos inactivos (eliminados) no se muestran en el listado del admin.
+      next: p => { this.productos.set(p.filter(x => x.estado === 'activo')); this.loading.set(false); },
       error: () => this.loading.set(false)
     });
   }
 
   cargarVentas() {
     this.ventaSvc.listarTodas().subscribe({ next: v => this.ventas.set(v), error: () => {} });
+  }
+
+  // ---- Dashboard: tarjetas de resumen ----
+
+  ventasDelMes(): number {
+    const ahora = new Date();
+    return this.ventas()
+      .filter(v => {
+        if (v.estado === 'cancelado') return false;
+        const f = new Date(v.fechaVenta);
+        return f.getMonth() === ahora.getMonth() && f.getFullYear() === ahora.getFullYear();
+      })
+      .reduce((acc, v) => acc + (v.total || 0), 0);
+  }
+
+  pedidosPendientes(): number {
+    return this.ventas().filter(v => v.estado === 'pendiente').length;
+  }
+
+  // Cuenta variantes (talla) cuyo stock llegó o cayó por debajo del mínimo configurado.
+  variantesStockBajo(): { producto: Producto; talla: string; cantidadDisponible: number }[] {
+    const resultado: { producto: Producto; talla: string; cantidadDisponible: number }[] = [];
+    for (const p of this.productos()) {
+      for (const v of (p.variantes || [])) {
+        const minimo = v.cantidadMinima ?? 3;
+        if (v.cantidadDisponible <= minimo) {
+          resultado.push({ producto: p, talla: v.talla, cantidadDisponible: v.cantidadDisponible });
+        }
+      }
+    }
+    return resultado;
+  }
+
+  productosStockBajo(): number {
+    return this.variantesStockBajo().length;
   }
 
   tallasResumen(p: Producto): string {
@@ -129,7 +165,11 @@ export class AdminPanel implements OnInit {
   eliminar(id: number) {
     if (!confirm('¿Eliminar este producto?')) return;
     this.catalogoSvc.eliminar(id).subscribe({
-      next: () => { this.showToast('Producto eliminado'); this.cargarProductos(); },
+      // El backend lo marca como inactivo; lo quitamos también de la lista visible al instante.
+      next: () => {
+        this.showToast('Producto eliminado');
+        this.productos.update(list => list.filter(p => p.idProducto !== id));
+      },
       error: () => this.showToast('Error al eliminar', 'error')
     });
   }

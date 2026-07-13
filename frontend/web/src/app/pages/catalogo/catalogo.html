@@ -70,7 +70,10 @@
                 <a [routerLink]="['/producto', p.idProducto]">
                   <img [src]="imagenUrl(p)" [alt]="p.nombre" />
                 </a>
-                @if(p.precioOferta) { <span class="oferta-badge">Oferta</span> }
+                <div class="badge-stack">
+                  @if(p.precioOferta) { <span class="oferta-badge">Oferta</span> }
+                  @if(esNuevo(p)) { <span class="nuevo-badge">Nuevo</span> }
+                </div>
                 @if(p.stockTotal < 1) { <span class="agotado-badge">Agotado</span> }
               </div>
               <div class="product-body">

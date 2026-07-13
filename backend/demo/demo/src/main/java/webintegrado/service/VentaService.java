@@ -43,6 +43,7 @@ public class VentaService {
 
         venta = ventaRepository.save(venta);
         List<DetalleVenta> detalles = new ArrayList<>();
+        java.math.BigDecimal total = java.math.BigDecimal.ZERO;
 
         for (VentaRequest.DetalleRequest d : request.getDetalles()) {
             ProductoTalla variante = productoTallaRepository.findById(d.getIdVariante())
@@ -55,15 +56,24 @@ public class VentaService {
             variante.setCantidadDisponible(variante.getCantidadDisponible() - d.getCantidad());
             productoTallaRepository.save(variante);
 
+            // El precio de venta respeta la oferta vigente si existe.
+            java.math.BigDecimal precio = producto.getPrecioOferta() != null
+                    ? producto.getPrecioOferta() : producto.getPrecioUnitario();
+
             DetalleVenta detalle = DetalleVenta.builder()
                     .venta(venta)
                     .producto(producto)
                     .variante(variante)
                     .cantidad(d.getCantidad())
-                    .precioUnitario(producto.getPrecioUnitario())
+                    .precioUnitario(precio)
                     .build();
             detalles.add(detalleVentaRepository.save(detalle));
+
+            total = total.add(precio.multiply(java.math.BigDecimal.valueOf(d.getCantidad())));
         }
+
+        venta.setTotal(total);
+        venta = ventaRepository.save(venta);
 
         carritoRepository.deleteByUsuarioIdUsuario(request.getIdUsuario());
         return toResponse(venta, detalles);

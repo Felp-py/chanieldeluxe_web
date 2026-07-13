@@ -15,6 +15,71 @@
     color: var(--warm-gray); 
 }
 
+/* Dashboard: tarjetas de resumen */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+}
+.stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: white;
+}
+.stat-icon-sales { background: var(--success); }
+.stat-icon-pending { background: #b8860b; }
+.stat-icon-stock { background: var(--danger); }
+.stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--warm-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+}
+.stat-value {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--charcoal);
+}
+.stat-card-alert {
+    border: 1.5px solid var(--danger);
+}
+.stock-bajo-list {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    font-size: 0.85rem;
+}
+.stock-bajo-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+.stock-bajo-pill {
+    background: #fdecea;
+    color: var(--danger);
+}
+@media(max-width: 720px) {
+    .stats-grid { grid-template-columns: 1fr; }
+}
+
 .tabs { 
     display: flex; 
     gap: 4px; 

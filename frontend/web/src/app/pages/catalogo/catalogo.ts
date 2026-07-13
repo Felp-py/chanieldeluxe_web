@@ -84,6 +84,15 @@ export class Catalogo implements OnInit {
     return p.imagenUrl || `https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&q=80`;
   }
 
+  // Un producto se considera "Nuevo" si fue creado hace 14 días o menos.
+  private static readonly DIAS_NUEVO = 14;
+  esNuevo(p: Producto): boolean {
+    if (!p.fechaCreacion) return false;
+    const creado = new Date(p.fechaCreacion).getTime();
+    const dias = (Date.now() - creado) / (1000 * 60 * 60 * 24);
+    return dias >= 0 && dias <= Catalogo.DIAS_NUEVO;
+  }
+
   showToast(msg: string, type = 'success') {
     this.toast.set(msg);
     this.toastType.set(type);

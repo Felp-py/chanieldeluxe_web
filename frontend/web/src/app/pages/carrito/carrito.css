@@ -96,15 +96,26 @@
   border-top: 1.5px solid var(--sand); 
   margin-bottom: 4px; 
 }
+.confirmacion-wrap {
+  max-width: 560px;
+  margin: 40px auto 80px;
+}
+
 .exito-card { 
   text-align: center; 
-  padding: 60px 40px; 
-  max-width: 480px; 
-  margin: 80px auto; 
+  padding: 48px 40px 40px; 
 }
-.exito-icon { 
-  font-size: 3rem; 
-  margin-bottom: 16px; 
+.exito-check {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--success);
+  color: var(--white);
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .exito-card h2 { 
   font-size: 1.8rem; 
@@ -113,6 +124,68 @@
 
 .exito-card p { 
   color: var(--warm-gray); 
+}
+
+.confirmacion-card {
+  margin-top: 20px;
+  padding: 28px;
+}
+.confirmacion-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 8px;
+  border-bottom: 1.5px solid var(--sand);
+}
+.confirmacion-label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--warm-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.confirmacion-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+.confirmacion-subtitle {
+  margin: 20px 0 10px;
+  font-size: 1rem;
+}
+.confirmacion-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.875rem;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--sand);
+}
+.confirmacion-item .talla-pill {
+  background: var(--sand);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin: 0 4px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--sand);
+}
+.detail-total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 14px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--charcoal);
 }
 @media(max-width: 900px) { 
   .carrito-layout { 

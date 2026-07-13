@@ -3,13 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CarritoService, CarritoItem } from '../../services/carrito.service';
 import { CatalogoService, Producto } from '../../services/catalogo.service';
-import { VentaService } from '../../services/venta.service';
+import { VentaService, Venta } from '../../services/venta.service';
 import { AuthService } from '../../services/auth.service';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, DatePipe, TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-carrito',
-  imports: [FormsModule, RouterLink, DecimalPipe],
+  imports: [FormsModule, RouterLink, DecimalPipe, DatePipe, TitleCasePipe],
   templateUrl: './carrito.html',
   styleUrl: './carrito.css'
 })
@@ -24,7 +24,8 @@ export class Carrito implements OnInit {
   productos = signal<Producto[]>([]);
   loading = signal(true);
   procesando = signal(false);
-  exito = signal(false);
+  // Guarda el pedido recién creado (con detalles, total, etc.) para mostrar la confirmación.
+  pedidoConfirmado = signal<Venta | null>(null);
   error = signal('');
 
   form = { metodoPago: 'tarjeta_credito', direccionEnvio: '', ciudadEnvio: 'Lima' };
@@ -66,11 +67,11 @@ export class Carrito implements OnInit {
       detalles: this.items().map(i => ({ idVariante: i.idVariante, cantidad: i.cantidad }))
     };
     this.ventaSvc.crear(payload).subscribe({
-      next: () => {
+      next: (venta) => {
         this.carritoSvc.vaciar(user.idUsuario).subscribe();
         this.items.set([]);
         this.procesando.set(false);
-        this.exito.set(true);
+        this.pedidoConfirmado.set(venta);
       },
       error: (e) => { this.procesando.set(false); this.error.set(e?.error?.message || 'Error al procesar el pedido.'); }
     });

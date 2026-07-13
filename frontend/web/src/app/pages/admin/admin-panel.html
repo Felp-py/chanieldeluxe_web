@@ -8,6 +8,42 @@
     <p>Bienvenido, {{auth.currentUser()?.nombre}}</p>
   </div>
 
+  <!-- Dashboard: tarjetas de resumen -->
+  <div class="stats-grid">
+    <div class="stat-card card">
+      <span class="stat-icon stat-icon-sales">S/</span>
+      <div>
+        <span class="stat-label">Ventas del mes</span>
+        <span class="stat-value">S/ {{ventasDelMes() | number:'1.2-2'}}</span>
+      </div>
+    </div>
+    <div class="stat-card card">
+      <span class="stat-icon stat-icon-pending">⏳</span>
+      <div>
+        <span class="stat-label">Pedidos pendientes</span>
+        <span class="stat-value">{{pedidosPendientes()}}</span>
+      </div>
+    </div>
+    <div class="stat-card card" [class.stat-card-alert]="productosStockBajo() > 0">
+      <span class="stat-icon stat-icon-stock">!</span>
+      <div>
+        <span class="stat-label">Tallas con stock bajo</span>
+        <span class="stat-value">{{productosStockBajo()}}</span>
+      </div>
+    </div>
+  </div>
+
+  @if(productosStockBajo() > 0) {
+    <div class="stock-bajo-list card">
+      <strong>Stock bajo el mínimo:</strong>
+      <div class="stock-bajo-pills">
+        @for(item of variantesStockBajo(); track item.producto.idProducto + '-' + item.talla) {
+          <span class="talla-pill stock-bajo-pill">{{item.producto.nombre}} · {{item.talla}}: {{item.cantidadDisponible}}</span>
+        }
+      </div>
+    </div>
+  }
+
   <div class="tabs">
     <button class="tab-btn" [class.active]="tab()==='productos'" (click)="tab.set('productos')">Productos</button>
     <button class="tab-btn" [class.active]="tab()==='ventas'" (click)="tab.set('ventas')">Ventas</button>

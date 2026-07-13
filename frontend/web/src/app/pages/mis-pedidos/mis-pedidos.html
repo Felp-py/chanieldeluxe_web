@@ -27,6 +27,21 @@
             <p>{{p.detalles?.length || 0}} artículo(s) · Pago: {{p.metodoPago | titlecase}}</p>
             <p class="pedido-dir"> {{p.direccionEnvio}}, {{p.ciudadEnvio}}</p>
           </div>
+
+          @if(estaCancelado(p)) {
+            <div class="timeline-cancelado">Pedido cancelado</div>
+          } @else {
+            <div class="timeline" [class.compact]="true">
+              @for(paso of pasos; track paso.key; let i = $index) {
+                <div class="timeline-step" [class.done]="pasoCompletado(p, i)" [class.current]="i === pasoActual(p)">
+                  <div class="timeline-dot">@if(pasoCompletado(p, i)) { ✓ }</div>
+                  <span class="timeline-label">{{paso.label}}</span>
+                </div>
+                @if(!$last) { <div class="timeline-line" [class.done]="i < pasoActual(p)"></div> }
+              }
+            </div>
+          }
+
           <div class="pedido-total">
             <span>Total</span>
             <strong>S/ {{p.total | number:'1.2-2'}}</strong>
@@ -51,6 +66,19 @@
           <button class="btn-close" (click)="cerrarDetalle()">✕</button>
         </div>
         <div class="modal-body">
+          @if(estaCancelado(pedidoDetalle()!)) {
+            <div class="timeline-cancelado" style="margin-bottom:16px;">Este pedido fue cancelado</div>
+          } @else {
+            <div class="timeline" style="margin-bottom:20px;">
+              @for(paso of pasos; track paso.key; let i = $index) {
+                <div class="timeline-step" [class.done]="pasoCompletado(pedidoDetalle()!, i)" [class.current]="i === pasoActual(pedidoDetalle()!)">
+                  <div class="timeline-dot">@if(pasoCompletado(pedidoDetalle()!, i)) { ✓ }</div>
+                  <span class="timeline-label">{{paso.label}}</span>
+                </div>
+                @if(!$last) { <div class="timeline-line" [class.done]="i < pasoActual(pedidoDetalle()!)"></div> }
+              }
+            </div>
+          }
           <div class="detail-row"><span>Estado</span><span class="badge" [class]="estadoBadge(pedidoDetalle()!.estado)">{{pedidoDetalle()!.estado | titlecase}}</span></div>
           <div class="detail-row"><span>Fecha</span><span>{{pedidoDetalle()!.fechaVenta | date:'dd/MM/yyyy HH:mm'}}</span></div>
           <div class="detail-row"><span>Método de pago</span><span>{{pedidoDetalle()!.metodoPago | titlecase}}</span></div>

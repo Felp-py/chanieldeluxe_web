@@ -190,21 +190,25 @@
 }
 
 .btn-del {
-    background: var(--danger);
-    color: var(--white);
-    border: none;
-    padding: 9px 18px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 500;
+    background: transparent;
+    color: var(--danger);
+    border: 1.5px solid var(--danger);
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     cursor: pointer;
     transition: var(--transition);
+    white-space: nowrap;
 }
 .btn-del:hover:not(:disabled) {
-    background: #a5311f;
+    background: var(--danger);
+    color: var(--white);
     transform: translateY(-1px);
 }
 .btn-del:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
+    transform: none;
 }

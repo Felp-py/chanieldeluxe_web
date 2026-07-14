@@ -119,6 +119,41 @@
 .talla-btn.active { background: var(--charcoal); color: white; border-color: var(--charcoal); }
 .talla-btn:disabled { opacity: 0.4; cursor: not-allowed; text-decoration: line-through; }
 
+.qty-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+.qty-btn {
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid var(--sand);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--charcoal);
+  font-weight: 600;
+  font-size: 1.05rem;
+  line-height: 1;
+  transition: all 0.2s;
+}
+.qty-btn:hover:not(:disabled) {
+  border-color: var(--charcoal);
+  background: var(--charcoal);
+  color: var(--white);
+}
+.qty-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.qty-value {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--charcoal);
+}
+
 .product-stock { margin: 16px 0; }
 
 .detalle-btn-add {

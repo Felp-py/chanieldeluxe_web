@@ -22,6 +22,7 @@ import { TitleCasePipe, DecimalPipe } from '@angular/common';
     notFound = signal(false);
 
     tallaSeleccionada = signal<string | null>(null);
+    cantidadSeleccionada = signal(1);
     toast = signal('');
     toastType = signal('success');
 
@@ -37,6 +38,8 @@ import { TitleCasePipe, DecimalPipe } from '@angular/common';
 
     seleccionarTalla(talla: string) {
         this.tallaSeleccionada.set(talla);
+        // reinicia la cantidad al cambiar de talla, respetando el nuevo stock disponible
+        this.cantidadSeleccionada.set(1);
     }
 
     get varianteElegida(): Variante | undefined {
@@ -44,6 +47,13 @@ import { TitleCasePipe, DecimalPipe } from '@angular/common';
         const talla = this.tallaSeleccionada();
         if (!p || !talla) return undefined;
         return (p.variantes || []).find(v => v.talla === talla);
+    }
+
+    cambiarCantidad(delta: number) {
+        const variante = this.varianteElegida;
+        const max = variante ? variante.cantidadDisponible : 1;
+        const nueva = Math.min(max, Math.max(1, this.cantidadSeleccionada() + delta));
+        this.cantidadSeleccionada.set(nueva);
     }
 
     agregarAlCarrito() {
@@ -56,8 +66,13 @@ import { TitleCasePipe, DecimalPipe } from '@angular/common';
         if (!variante) { this.showToast('Selecciona una talla', 'error'); return; }
         if (variante.cantidadDisponible < 1) { this.showToast('Sin stock disponible en esa talla', 'error'); return; }
 
-        this.carritoSvc.agregar(user.idUsuario, variante.idVariante).subscribe({
-        next: () => this.showToast(`"${p.nombre}" (talla ${variante.talla}) agregado al carrito 🛍️`),
+        const cantidad = this.cantidadSeleccionada();
+
+        this.carritoSvc.agregar(user.idUsuario, variante.idVariante, cantidad).subscribe({
+        next: () => {
+            this.showToast(`"${p.nombre}" (talla ${variante.talla}, x${cantidad}) agregado al carrito 🛍️`);
+            this.cantidadSeleccionada.set(1);
+        },
         error: () => this.showToast('Error al agregar al carrito', 'error')
         });
     }

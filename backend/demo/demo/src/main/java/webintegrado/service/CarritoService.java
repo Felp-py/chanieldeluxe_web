@@ -46,6 +46,22 @@ public class CarritoService {
                 .stream().map(this::toResponse).toList();
     }
 
+    public CarritoResponse actualizarCantidad(Integer idCarrito, Integer cantidad) {
+        if (cantidad == null || cantidad < 1) {
+            throw new RuntimeException("La cantidad debe ser al menos 1");
+        }
+        Carrito carrito = carritoRepository.findById(idCarrito)
+                .orElseThrow(() -> new RuntimeException("Item de carrito no encontrado"));
+
+        Integer disponible = carrito.getVariante().getCantidadDisponible();
+        if (disponible != null && cantidad > disponible) {
+            throw new RuntimeException("Solo hay " + disponible + " unidades disponibles en esa talla");
+        }
+
+        carrito.setCantidad(cantidad);
+        return toResponse(carritoRepository.save(carrito));
+    }
+
     public void eliminar(Integer idCarrito) {
         carritoRepository.deleteById(idCarrito);
     }

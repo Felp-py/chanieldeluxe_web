@@ -29,6 +29,9 @@ export class CarritoService {
       tap(() => this.count.update(c => c + 1))
     );
   }
+  actualizarCantidad(idCarrito: number, cantidad: number): Observable<CarritoItem> {
+    return this.http.put<CarritoItem>(`${this.apiUrl}/item/${idCarrito}`, { cantidad });
+  }
   eliminarItem(idCarrito: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/item/${idCarrito}`).pipe(
       tap(() => this.count.update(c => Math.max(0, c - 1)))

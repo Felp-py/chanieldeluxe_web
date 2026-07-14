@@ -24,6 +24,8 @@ export class Catalogo implements OnInit {
 
   // talla seleccionada por el usuario para cada producto (antes de agregar al carrito)
   tallaSeleccionada: Record<number, string> = {};
+  // cantidad seleccionada por el usuario para cada producto (antes de agregar al carrito)
+  cantidadSeleccionada: Record<number, number> = {};
 
   filtroCategoria = '';
   filtroTalla = '';
@@ -59,11 +61,25 @@ export class Catalogo implements OnInit {
 
   seleccionarTalla(p: Producto, talla: string) {
     this.tallaSeleccionada[p.idProducto] = talla;
+    // reinicia la cantidad al cambiar de talla, respetando el nuevo stock disponible
+    this.cantidadSeleccionada[p.idProducto] = 1;
   }
 
   varianteElegida(p: Producto): Variante | undefined {
     const talla = this.tallaSeleccionada[p.idProducto];
     return (p.variantes || []).find(v => v.talla === talla);
+  }
+
+  cantidad(p: Producto): number {
+    return this.cantidadSeleccionada[p.idProducto] || 1;
+  }
+
+  cambiarCantidad(p: Producto, delta: number) {
+    const variante = this.varianteElegida(p);
+    const max = variante ? variante.cantidadDisponible : 1;
+    const actual = this.cantidad(p);
+    const nueva = Math.min(max, Math.max(1, actual + delta));
+    this.cantidadSeleccionada[p.idProducto] = nueva;
   }
 
   agregarAlCarrito(p: Producto) {
@@ -74,8 +90,13 @@ export class Catalogo implements OnInit {
     if (!variante) { this.showToast('Selecciona una talla', 'error'); return; }
     if (variante.cantidadDisponible < 1) { this.showToast('Sin stock disponible en esa talla', 'error'); return; }
 
-    this.carritoSvc.agregar(user.idUsuario, variante.idVariante).subscribe({
-      next: () => this.showToast(`"${p.nombre}" (talla ${variante.talla}) agregado al carrito 🛍️`),
+    const cantidad = this.cantidad(p);
+
+    this.carritoSvc.agregar(user.idUsuario, variante.idVariante, cantidad).subscribe({
+      next: () => {
+        this.showToast(`"${p.nombre}" (talla ${variante.talla}, x${cantidad}) agregado al carrito 🛍️`);
+        this.cantidadSeleccionada[p.idProducto] = 1;
+      },
       error: () => this.showToast('Error al agregar al carrito', 'error')
     });
   }

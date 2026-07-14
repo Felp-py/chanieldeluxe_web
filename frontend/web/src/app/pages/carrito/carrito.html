@@ -61,7 +61,14 @@
             <div class="item-info">
               <h3>{{item.nombreProducto}}</h3>
               <p>Talla: <strong>{{item.talla}}</strong></p>
-              <p>Cantidad: {{item.cantidad}}</p>
+              <p class="qty-row">
+                Cantidad:
+                <span class="qty-selector">
+                  <button type="button" class="qty-btn" [disabled]="item.cantidad <= 1 || actualizandoId()===item.idCarrito" (click)="cambiarCantidad(item, -1)">-</button>
+                  <span class="qty-value">{{item.cantidad}}</span>
+                  <button type="button" class="qty-btn" [disabled]="actualizandoId()===item.idCarrito || (stockDisponible(item) !== null && item.cantidad >= stockDisponible(item)!)" (click)="cambiarCantidad(item, 1)">+</button>
+                </span>
+              </p>
               <p>Precio unitario: S/ {{item.precioUnitario | number:'1.2-2'}}</p>
             </div>
             <div class="item-right">

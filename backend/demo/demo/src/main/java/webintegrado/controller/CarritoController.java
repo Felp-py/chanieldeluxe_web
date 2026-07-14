@@ -26,6 +26,12 @@ public class CarritoController {
         return ResponseEntity.ok(carritoService.listarPorUsuario(idUsuario));
     }
 
+    @PutMapping("/item/{idCarrito}")
+    public ResponseEntity<CarritoResponse> actualizarCantidad(@PathVariable Integer idCarrito, @RequestBody java.util.Map<String, Integer> body) {
+        Integer cantidad = body.get("cantidad");
+        return ResponseEntity.ok(carritoService.actualizarCantidad(idCarrito, cantidad));
+    }
+
     @DeleteMapping("/item/{idCarrito}")
     public ResponseEntity<Void> eliminarItem(@PathVariable Integer idCarrito) {
         carritoService.eliminar(idCarrito);

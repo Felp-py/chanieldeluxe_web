@@ -27,6 +27,7 @@ export class Carrito implements OnInit {
   // Guarda el pedido recién creado (con detalles, total, etc.) para mostrar la confirmación.
   pedidoConfirmado = signal<Venta | null>(null);
   error = signal('');
+  actualizandoId = signal<number | null>(null);
 
   form = { metodoPago: 'tarjeta_credito', direccionEnvio: '', ciudadEnvio: 'Lima' };
 
@@ -47,6 +48,33 @@ export class Carrito implements OnInit {
 
   get total() { return this.items().reduce((acc, i) => acc + i.subtotal, 0); }
   get cantidadTotal() { return this.items().reduce((acc, i) => acc + i.cantidad, 0); }
+
+  // Stock disponible de la variante (talla) de un item, para limitar el selector de cantidad.
+  stockDisponible(item: CarritoItem): number | null {
+    const prod = this.productos().find(p => p.idProducto === item.idProducto);
+    const variante = prod?.variantes?.find(v => v.talla === item.talla);
+    return variante ? variante.cantidadDisponible : null;
+  }
+
+  cambiarCantidad(item: CarritoItem, delta: number) {
+    const max = this.stockDisponible(item);
+    const nueva = item.cantidad + delta;
+    if (nueva < 1) return;
+    if (max !== null && nueva > max) { this.error.set(`Solo hay ${max} unidades disponibles en talla ${item.talla}.`); return; }
+
+    this.error.set('');
+    this.actualizandoId.set(item.idCarrito);
+    this.carritoSvc.actualizarCantidad(item.idCarrito, nueva).subscribe({
+      next: actualizado => {
+        this.items.update(list => list.map(i => i.idCarrito === item.idCarrito ? actualizado : i));
+        this.actualizandoId.set(null);
+      },
+      error: (e) => {
+        this.error.set(e?.error?.message || 'No se pudo actualizar la cantidad.');
+        this.actualizandoId.set(null);
+      }
+    });
+  }
 
   eliminar(id: number) {
     this.carritoSvc.eliminarItem(id).subscribe({

@@ -71,6 +71,18 @@
             </div>
             </div>
 
+            <!-- Selector de cantidad -->
+            @if(varianteElegida && varianteElegida!.cantidadDisponible > 0) {
+                <div class="detalle-tallas">
+                <span class="filter-label">Cantidad</span>
+                <div class="qty-selector">
+                    <button type="button" class="qty-btn" [disabled]="cantidadSeleccionada() <= 1" (click)="cambiarCantidad(-1)">-</button>
+                    <span class="qty-value">{{cantidadSeleccionada()}}</span>
+                    <button type="button" class="qty-btn" [disabled]="cantidadSeleccionada() >= varianteElegida!.cantidadDisponible" (click)="cambiarCantidad(1)">+</button>
+                </div>
+                </div>
+            }
+
             <div class="product-stock">
             @if(varianteElegida) {
                 @if(varianteElegida!.cantidadDisponible > 5) {

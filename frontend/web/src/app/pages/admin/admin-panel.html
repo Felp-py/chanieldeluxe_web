@@ -18,7 +18,7 @@
       </div>
     </div>
     <div class="stat-card card">
-      <span class="stat-icon stat-icon-pending">⏳</span>
+      <span class="stat-icon stat-icon-pending"></span>
       <div>
         <span class="stat-label">Pedidos pendientes</span>
         <span class="stat-value">{{pedidosPendientes()}}</span>
@@ -113,10 +113,6 @@
       <div class="content-header">
         <h2>Todas las ventas ({{ventas().length}})</h2>
       </div>
-      <p style="color:#777; font-size:13px; margin:-8px 0 12px;">
-        El estado avanza automáticamente (pendiente → procesado → enviado → entregado) a lo largo del día.
-        Aquí puedes forzar un estado o cancelar un pedido manualmente.
-      </p>
       <div class="table-wrap card">
         <table class="data-table">
           <thead>
